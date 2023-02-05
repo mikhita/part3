@@ -66,12 +66,18 @@ const generateId = () => {
 app.post("/api/persons", (req, res) => {
   const body = req.body;
 
-  console.log(body);
   if (!body.name || !body.number) {
-    console.log(body);
-
     return res.status(400).json({
       error: "content missing",
+    });
+  }
+
+  const name = body.name;
+  const hasExactName = (name) => (person) => person.name === name;
+
+  if (persons.some(hasExactName(name))) {
+    return res.status(400).json({
+      error: "name must be unique",
     });
   }
 
