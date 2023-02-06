@@ -58,71 +58,51 @@ let notes = [
   },
 ];
 
-app.get("/", (req, res) => {
-  res.send("<h1>Hello World!</h1>");
+const generateId = () => {
+  const maxId = notes.length > 0 ? Math.floor(Math.random() * 1000000000) : 0;
+  return maxId + 1;
+};
+
+app.post("/api/notes", (request, response) => {
+  const body = request.body;
+
+  if (!body.content) {
+    return response.status(400).json({
+      error: "content missing",
+    });
+  }
+
+  const note = {
+    content: body.content,
+    important: body.important || false,
+    date: new Date(),
+    id: generateId(),
+  };
+
+  notes = notes.concat(note);
+
+  response.json(note);
 });
 
-app.get("/api/notes", (req, res) => {
-  res.json(notes);
+app.get("/api/notes/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const note = notes.find((note) => note.id === id);
+
+  if (note) {
+    response.json(note);
+  } else {
+    response.status(404).end();
+  }
+
+  response.json(note);
 });
-// app.get("/info", (req, res) => {
-//   const date = new Date();
-//   res.send(
-//     `<p>PhoneBook has info for ${persons.length} people.</p><p> Response date: ${date}</p>`
-//   );
-// });
 
-// app.get("/api/persons/:id", (req, res) => {
-//   const id = Number(req.params.id);
-//   console.log(id);
-//   const person = persons.find((person) => person.id === id);
-//   console.log(person);
-//   if (person) {
-//     res.json(person);
-//   } else {
-//     res.status(404).end();
-//   }
-// });
+app.delete("/api/notes/:id", (request, response) => {
+  const id = Number(request.params.id);
+  notes = notes.filter((note) => note.id !== id);
 
-// app.delete("/api/persons/:id", (req, res) => {
-//   const id = Number(req.params.id);
-//   persons.filter((person) => person.id !== id);
-//   res.status(204).end();
-// });
-
-// const generateId = () => {
-//   const maxId = persons.length > 0 ? Math.floor(Math.random() * 1000000000) : 0;
-//   return maxId + 1;
-// };
-
-// app.post("/api/persons", (req, res) => {
-//   const body = req.body;
-
-//   if (!body.name || !body.number) {
-//     return res.status(400).json({
-//       error: "content missing",
-//     });
-//   }
-
-//   const name = body.name;
-//   const hasExactName = (name) => (person) => person.name === name;
-
-//   if (persons.some(hasExactName(name))) {
-//     return res.status(400).json({
-//       error: "name must be unique",
-//     });
-//   }
-
-//   const person = {
-//     id: generateId(),
-//     name: body.name,
-//     number: body.number,
-//   };
-
-//   persons = persons.concat(person);
-
-//   res.json(person);
-// });
+  response.status(204).end();
+});
 
 const PORT = process.env.PORT || 3001;
 console.log(PORT);
