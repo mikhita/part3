@@ -84,45 +84,45 @@ app.get("/api/persons/:id", (req, res) => {
   }
 });
 
-app.delete("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
-  persons.filter((person) => person.id !== id);
-  res.status(204).end();
-});
+// app.delete("/api/persons/:id", (req, res) => {
+//   const id = Number(req.params.id);
+//   persons.filter((person) => person.id !== id);
+//   res.status(204).end();
+// });
 
-const generateId = () => {
-  const maxId = persons.length > 0 ? Math.floor(Math.random() * 1000000000) : 0;
-  return maxId + 1;
-};
+// const generateId = () => {
+//   const maxId = persons.length > 0 ? Math.floor(Math.random() * 1000000000) : 0;
+//   return maxId + 1;
+// };
 
-app.post("/api/persons", (req, res) => {
-  const body = req.body;
+// app.post("/api/persons", (req, res) => {
+//   const body = req.body;
 
-  if (!body.name || !body.number) {
-    return res.status(400).json({
-      error: "content missing",
-    });
-  }
+//   if (!body.name || !body.number) {
+//     return res.status(400).json({
+//       error: "content missing",
+//     });
+//   }
 
-  const name = body.name;
-  const hasExactName = (name) => (person) => person.name === name;
+//   const name = body.name;
+//   const hasExactName = (name) => (person) => person.name === name;
 
-  if (persons.some(hasExactName(name))) {
-    return res.status(400).json({
-      error: "name must be unique",
-    });
-  }
+//   if (persons.some(hasExactName(name))) {
+//     return res.status(400).json({
+//       error: "name must be unique",
+//     });
+//   }
 
-  const person = {
-    id: generateId(),
-    name: body.name,
-    number: body.number,
-  };
+//   const person = {
+//     id: generateId(),
+//     name: body.name,
+//     number: body.number,
+//   };
 
-  persons = persons.concat(person);
+//   persons = persons.concat(person);
 
-  res.json(person);
-});
+//   res.json(person);
+// });
 
 const PORT = process.env.PORT || 3001;
 console.log(PORT);
