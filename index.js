@@ -58,6 +58,10 @@ let notes = [
   },
 ];
 
+app.get("/api/notes", (req, res) => {
+  res.json(notes);
+});
+
 const generateId = () => {
   const maxId = notes.length > 0 ? Math.floor(Math.random() * 1000000000) : 0;
   return maxId + 1;
