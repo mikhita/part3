@@ -1,4 +1,5 @@
 require("dotenv").config();
+const fs = require("fs");
 
 const express = require("express");
 
@@ -20,6 +21,7 @@ app.use(
   })
 );
 app.use(cors());
+app.use(express.static('build'))
 
 // morgan((tokens, req, res) => {
 //     let logData = `${tokens.method(req, res)} ${tokens.url(
