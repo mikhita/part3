@@ -1,6 +1,9 @@
+require("dotenv").config();
+
 const express = require("express");
 
 const morgan = require("morgan");
+const cors = require("cors");
 const app = express();
 
 app.use(express.json());
@@ -10,15 +13,26 @@ app.use(
       req,
       res
     )} ${tokens.status(req, res)}`;
-
     if (req.method === "POST") {
       logData += `\nPost Data: ${JSON.stringify(req.body)}`;
     }
-
     return logData;
   })
 );
+app.use(cors());
 
+// morgan((tokens, req, res) => {
+//     let logData = `${tokens.method(req, res)} ${tokens.url(
+//       req,
+//       res
+//     )} ${tokens.status(req, res)}`;
+
+//     if (req.method === "POST") {
+//       logData += `\nPost Data: ${JSON.stringify(req.body)}`;
+//     }
+
+//     return logData;
+//   })
 let persons = [
   {
     id: 1,
@@ -108,7 +122,8 @@ app.post("/api/persons", (req, res) => {
   res.json(person);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
+console.log(PORT);
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
