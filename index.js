@@ -72,23 +72,25 @@ app.get("/api/persons", (request, response) => {
     response.json(persons);
   });
 });
-app.get("/info", (req, res) => {
-  const date = new Date();
-  res.send(
-    `<p>PhoneBook has info for ${persons.length} people.</p><p> Response date: ${date}</p>`
-  );
-});
+// app.get("/info", (req, res) => {
+//   const date = new Date();
+//   res.send(
+//     `<p>PhoneBook has info for ${persons.length} people.</p><p> Response date: ${date}</p>`
+//   );
+// });
+// app.get("/api/notes/:id", (request, response) => {
+//   Note.findById(request.params.id).then((note) => {
+//     response.json(note);
+//   });
+// });
 
 app.get("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
-  console.log(id);
-  const person = persons.find((person) => person.id === id);
-  console.log(person);
-  if (person) {
+  Person.findById(req.params.id).then((person) => {
+    if (!person) {
+      return res.status(404).end();
+    }
     res.json(person);
-  } else {
-    res.status(404).end();
-  }
+  });
 });
 
 // app.delete("/api/persons/:id", (req, res) => {
@@ -102,34 +104,44 @@ app.get("/api/persons/:id", (req, res) => {
 //   return maxId + 1;
 // };
 
-// app.post("/api/persons", (req, res) => {
-//   const body = req.body;
+app.post("/api/persons", (req, res) => {
+  const body = req.body;
 
-//   if (!body.name || !body.number) {
-//     return res.status(400).json({
-//       error: "content missing",
-//     });
-//   }
+  if (!body.name || !body.number) {
+    return res.status(400).json({
+      error: "content missing",
+    });
+  }
 
-//   const name = body.name;
-//   const hasExactName = (name) => (person) => person.name === name;
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  });
+  console.log(person);
 
-//   if (persons.some(hasExactName(name))) {
-//     return res.status(400).json({
-//       error: "name must be unique",
-//     });
-//   }
+  person.save().then((savedPerson) => {
+    res.json(savedPerson);
+  });
 
-//   const person = {
-//     id: generateId(),
-//     name: body.name,
-//     number: body.number,
-//   };
+  // const person = {
+  //   id: generateId(),
+  //   name: body.name,
+  //   number: body.number,
+  // };
 
-//   persons = persons.concat(person);
+  // const name = body.name;
+  // const hasExactName = (name) => (person) => person.name === name;
 
-//   res.json(person);
-// });
+  // if (persons.some(hasExactName(name))) {
+  //   return res.status(400).json({
+  //     error: "name must be unique",
+  //   });
+  // }
+
+  // persons = persons.concat(person);
+
+  // res.json(person);
+});
 
 const PORT = process.env.PORT || 3001;
 console.log(PORT);
