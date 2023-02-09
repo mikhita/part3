@@ -84,7 +84,8 @@ app.get("/api/persons", (request, response) => {
 //   });
 // });
 
-app.get("/api/persons/:id", (req, res, next) => {
+app.get("/api/persons/:id", (error, req, res, next) => {
+  console.log(error);
   Person.findById(req.params.id)
     .then((person) => {
       if (person) {
@@ -96,7 +97,8 @@ app.get("/api/persons/:id", (req, res, next) => {
     .catch((error) => next(error));
 });
 
-app.delete("/api/persons/:id", (req, res, next) => {
+app.delete("/api/persons/:id", (error, req, res, next) => {
+  console.log(error);
   Person.findByIdAndRemove(req.params._id)
     .then((result) => {
       res.status(204).end();
@@ -158,3 +160,6 @@ console.log(PORT);
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// handler of requests with result to errors
+app.use(errorHandler);
