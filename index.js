@@ -84,20 +84,25 @@ app.get("/api/persons", (request, response) => {
 //   });
 // });
 
-app.get("/api/persons/:id", (req, res) => {
-  Person.findById(req.params.id).then((person) => {
-    if (!person) {
-      return res.status(404).end();
-    }
-    res.json(person);
-  });
+app.get("/api/persons/:id", (req, res, next) => {
+  Person.findById(req.params.id)
+    .then((person) => {
+      if (person) {
+        res.json(person);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
 });
 
-// app.delete("/api/persons/:id", (req, res) => {
-//   const id = Number(req.params.id);
-//   persons.filter((person) => person.id !== id);
-//   res.status(204).end();
-// });
+app.delete("/api/persons/:id", (req, res, next) => {
+  Person.findByIdAndRemove(req.params._id)
+    .then((result) => {
+      res.status(204).end();
+    })
+    .catch((error) => next(error));
+});
 
 // const generateId = () => {
 //   const maxId = persons.length > 0 ? Math.floor(Math.random() * 1000000000) : 0;
@@ -119,9 +124,14 @@ app.post("/api/persons", (req, res) => {
   });
   console.log(person);
 
-  person.save().then((savedPerson) => {
-    res.json(savedPerson);
-  });
+  person
+    .save()
+    .then((savedPerson) => {
+      res.json(savedPerson);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: error.message });
+    });
 
   // const person = {
   //   id: generateId(),
