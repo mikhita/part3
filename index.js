@@ -9,6 +9,17 @@ const app = express();
 const Person = require("./models/person");
 const mongoose = require("mongoose");
 const password = process.env.API_KEY;
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
+  }
+
+  next(error);
+};
 
 app.use(express.json());
 app.use(
@@ -69,22 +80,39 @@ app.delete("/api/persons/:id", (request, response, next) => {
     })
     .catch((error) => next(error));
 });
+// app.put("/api/persons/:id", (request, response, next) => {
+//   const body = request.body;
+
+//   const person = {
+//     name: body.name,
+//     number: body.number,
+//   };
+
+//   Person.findByIdAndUpdate(request.params.id, person, { new: true })
+//     .then((updatedPerson) => {
+//       response.json(updatedPerson);
+//     })
+//     .catch((error) => next(error));
+// });
 app.put("/api/persons/:id", (request, response, next) => {
-  const body = request.body;
+  const { name, number } = request.body;
 
-  const person = {
-    name: body.name,
-    number: body.number,
-  };
-
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+  Person.findByIdAndUpdate(
+    request.params.id,
+    { name, number },
+    {
+      new: true,
+      runValidators: true,
+      context: "query",
+    }
+  )
     .then((updatedPerson) => {
       response.json(updatedPerson);
     })
     .catch((error) => next(error));
 });
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
   const body = req.body;
 
   if (!body.name || !body.number) {
@@ -96,6 +124,7 @@ app.post("/api/persons", (req, res) => {
   const person = new Person({
     name: body.name,
     number: body.number,
+    date: new Date(),
   });
   console.log(person);
 
@@ -104,9 +133,7 @@ app.post("/api/persons", (req, res) => {
     .then((savedPerson) => {
       res.json(savedPerson);
     })
-    .catch((error) => {
-      res.status(500).json({ error: error.message });
-    });
+    .catch((error) => next(error));
 
   // const name = body.name;
   // const hasExactName = (name) => (person) => person.name === name;
@@ -123,6 +150,7 @@ app.post("/api/persons", (req, res) => {
 
   // res.json(person);
 });
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 console.log(PORT);
