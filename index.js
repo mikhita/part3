@@ -37,12 +37,12 @@ app.get("/api/persons", (request, response) => {
     response.json(persons);
   });
 });
-// app.get("/info", (req, res) => {
-//   const date = new Date();
-//   res.send(
-//     `<p>PhoneBook has info for ${persons.length} people.</p><p> Response date: ${date}</p>`
-//   );
-// });
+app.get("/info", (request, response) => {
+  const date = new Date();
+  response.send(
+    `<p>PhoneBook has info for ${Person.length} people.</p><p> Response date: ${date}</p>`
+  );
+});
 // app.get("/api/notes/:id", (request, response) => {
 //   Note.findById(request.params.id).then((note) => {
 //     response.json(note);
@@ -53,7 +53,6 @@ app.get("/api/persons/:id", (req, res, next) => {
   Person.findById(req.params.id)
     .then((person) => {
       if (person) {
-        console.log("I am single pewrson");
         res.json(person);
       } else {
         res.status(404).end();
