@@ -7,22 +7,8 @@ const morgan = require("morgan");
 const cors = require("cors");
 const app = express();
 const Person = require("./models/person");
-// console.log(Person);
 const mongoose = require("mongoose");
 const password = process.env.API_KEY;
-
-// DO NOT SAVE YOUR PASSWORD TO GITHUB!!
-// const url = `mongodb+srv://Mikheil:${password}@cluster0.xgq3fri.mongodb.net/personApp?retryWrites=true&w=majority`;
-
-// mongoose.set("strictQuery", false);
-// mongoose.connect(url);
-
-// const personSchema = new mongoose.Schema({
-//   content: String,
-//   important: Boolean,
-// });
-
-// const Person = mongoose.model("Person", personSchema);
 
 app.use(express.json());
 app.use(
@@ -33,35 +19,14 @@ app.use(
     )} ${tokens.status(req, res)}`;
     if (req.method === "POST") {
       logData += `\nPost Data: ${JSON.stringify(req.body)}`;
+    } else if (req.method === "PUT") {
+      logData += `\nPut Data: ${JSON.stringify(req.body)}`;
     }
     return logData;
   })
 );
 app.use(cors());
 app.use(express.static("build"));
-
-// let persons = [
-//   {
-//     id: 1,
-//     name: "Arto Hellas",
-//     number: "040-123456",
-//   },
-//   {
-//     id: 2,
-//     name: "Ada Lovelace",
-//     number: "39-44-5323523",
-//   },
-//   {
-//     id: 3,
-//     name: "Dan Abramov",
-//     number: "12-43-234345",
-//   },
-//   {
-//     id: 4,
-//     name: "Mary Poppendieck",
-//     number: "39-23-6423122",
-//   },
-// ];
 
 app.get("/", (req, res) => {
   res.send("<h1>Hello World!</h1>");
@@ -84,11 +49,11 @@ app.get("/api/persons", (request, response) => {
 //   });
 // });
 
-app.get("/api/persons/:id", (error, req, res, next) => {
-  console.log(error);
+app.get("/api/persons/:id", (req, res, next) => {
   Person.findById(req.params.id)
     .then((person) => {
       if (person) {
+        console.log("I am single pewrson");
         res.json(person);
       } else {
         res.status(404).end();
@@ -97,19 +62,28 @@ app.get("/api/persons/:id", (error, req, res, next) => {
     .catch((error) => next(error));
 });
 
-app.delete("/api/persons/:id", (error, req, res, next) => {
-  console.log(error);
-  Person.findByIdAndRemove(req.params._id)
+app.delete("/api/persons/:id", (request, response, next) => {
+  Person.findByIdAndRemove(request.params.id)
     .then((result) => {
-      res.status(204).end();
+      console.log("I am in delete section");
+      response.status(204).end();
     })
     .catch((error) => next(error));
 });
+app.put("/api/persons/:id", (request, response, next) => {
+  const body = request.body;
 
-// const generateId = () => {
-//   const maxId = persons.length > 0 ? Math.floor(Math.random() * 1000000000) : 0;
-//   return maxId + 1;
-// };
+  const person = {
+    name: body.name,
+    number: body.number,
+  };
+
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then((updatedPerson) => {
+      response.json(updatedPerson);
+    })
+    .catch((error) => next(error));
+});
 
 app.post("/api/persons", (req, res) => {
   const body = req.body;
@@ -135,19 +109,15 @@ app.post("/api/persons", (req, res) => {
       res.status(500).json({ error: error.message });
     });
 
-  // const person = {
-  //   id: generateId(),
-  //   name: body.name,
-  //   number: body.number,
-  // };
-
   // const name = body.name;
   // const hasExactName = (name) => (person) => person.name === name;
 
   // if (persons.some(hasExactName(name))) {
-  //   return res.status(400).json({
-  //     error: "name must be unique",
-  //   });
+  //   console.log("hasexactname", hasExactName(name));
+  //   return res.json(person);
+  // res.status(400).json({
+  //   error: "name must be unique",
+  // });
   // }
 
   // persons = persons.concat(person);
@@ -160,6 +130,3 @@ console.log(PORT);
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-// handler of requests with result to errors
-app.use(errorHandler);
