@@ -1,52 +1,40 @@
 const personsRouter = require('express').Router()
 const Person = require('../models/person')
 
-personsRouter.get('/', (request, response) => {
-  Person.find({}).then(persons => {
+personsRouter.get('/', async(request, response) => {
+  await Person.find({}).then(persons => {
     response.json(persons)
   })
 })
 
-personsRouter.get('/:id', (request, response, next) => {
-  Person.findById(request.params.id)
-    .then(person => {
-      if (person) {
-        response.json(person)
-      } else {
-        response.status(404).end()
-      }
-    })
-    .catch(error => next(error))
+personsRouter.get('/:id', async (request, response) => {
+  const person = await Person.findById(request.params.id)
+  if(person){
+    response.json(person)
+  } else{
+    response.status(404).end()
+  }
 })
 
-personsRouter.post('/', (request, response, next) => {
+personsRouter.post('/', async(request, response) => {
   const body = request.body
-
   const person = new Person({
     name: body.name,
     number: body.number,
     date: new Date(),
   })
-
-  person
-    .save()
-    .then((savedPerson) => {
-      response.json(savedPerson)
-    })
-    .catch((error) => next(error))
+  const savedPerson = await person.save()
+  response.status(201).json(savedPerson)
 })
 
-personsRouter.delete('/:id', (request, response, next) => {
-  Person.findByIdAndRemove(request.params.id)
-    .then(() => {
-      response.status(204).end()
-    })
-    .catch(error => next(error))
+
+personsRouter.delete('/:id', async (request, response) => {
+  await Person.findByIdAndRemove(request.params.id)
+  response.status(204).end()
 })
 
-personsRouter.put('/:id', (request, response, next) => {
+personsRouter.put('/:id', (request, response) => {
   const { name, number } = request.body
-
   Person.findByIdAndUpdate(
     request.params.id,
     { name, number },
@@ -59,7 +47,6 @@ personsRouter.put('/:id', (request, response, next) => {
     .then((updatedPerson) => {
       response.json(updatedPerson)
     })
-    .catch((error) => next(error))
 })
 
 module.exports = personsRouter
